@@ -19,7 +19,8 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import axios from "axios";
-import ProcedureFormModal from "./ProcedureFormModal";
+import ProcedureFormDialog from "./ProcedureFormDialog";
+
 const ViewPricingCrud = () => {
   const [rows, setRows] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -42,6 +43,7 @@ const ViewPricingCrud = () => {
   }, []);
 
   const handleEdit = (data) => {
+    console.log("data", data);
     setEditMode(true);
     setSelectedData(data);
     setOpenModal(true);
@@ -231,12 +233,12 @@ const ViewPricingCrud = () => {
       </Box>
 
       {/* Modal for Create/Edit */}
-      <ProcedureFormModal
+      <ProcedureFormDialog
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={handleModalSubmit}
-        mode={editMode ? "edit" : "create"}
-        initialData={selectedData}
+        editMode={editMode}
+        selectedData={selectedData}
       />
     </Box>
   );

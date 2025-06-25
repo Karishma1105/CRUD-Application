@@ -1,15 +1,29 @@
 import React, { useEffect, useState } from "react";
 import {
-  TextField,
-  Button,
   Box,
   Typography,
   Paper,
   IconButton,
+  Grid,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
+
+const procedureOptions = [
+  "Fluoroscopic Angiogram",
+  "X-Ray",
+  "CT Scan",
+  "Ultrasound",
+];
+
+const taxOptions = [0, 5, 12, 18, 28];
 
 const EditPricingCrud = () => {
   const [form, setForm] = useState({
@@ -18,23 +32,21 @@ const EditPricingCrud = () => {
     price: "",
     tax: "",
   });
-
   const [totalAmount, setTotalAmount] = useState(0);
-
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Fetch procedure by ID
   useEffect(() => {
     axios
       .get(
         `https://684d210265ed087139152a4b.mockapi.io/procedure/Procedures/${id}`
       )
-      .then((res) => setForm(res.data))
+      .then((res) => {
+        setForm(res.data);
+      })
       .catch((err) => console.error("Fetch Error:", err));
   }, [id]);
 
-  // Recalculate total whenever price or tax changes
   useEffect(() => {
     const price = parseFloat(form.price) || 0;
     const tax = parseFloat(form.tax) || 0;
@@ -43,7 +55,8 @@ const EditPricingCrud = () => {
   }, [form.price, form.tax]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleUpdate = async (e) => {
@@ -61,86 +74,167 @@ const EditPricingCrud = () => {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
+    <Box
+      sx={{
+        padding: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        backgroundColor: "rgba(0,0,0,0.5)",
+      }}
+    >
       <Paper
-        elevation={4}
-        sx={{ padding: 4, maxWidth: 500, margin: "auto", position: "relative" }}
+        elevation={5}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          maxWidth: "90vw",
+          width: "1100px",
+          position: "relative",
+        }}
       >
-        {/* Close Button */}
-        <IconButton
-          onClick={() => navigate("/")}
-          sx={{ position: "absolute", top: 8, right: 8 }}
+        <Box
+          sx={{
+            backgroundColor: "#1976d2",
+            color: "white",
+            py: 1,
+            px: 3,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+          }}
         >
-          <CloseIcon />
-        </IconButton>
-
-        <Typography variant="h5" gutterBottom>
-          Edit Procedure
-        </Typography>
-
-        <form onSubmit={handleUpdate}>
-          <TextField
-            name="procedure"
-            label="Procedure"
-            value={form.procedure}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="note"
-            label="Note"
-            value={form.note}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="price"
-            label="Price (₹)"
-            type="number"
-            value={form.price}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            name="tax"
-            label="Tax (%)"
-            type="number"
-            value={form.tax}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Total Amount (₹)"
-            value={totalAmount}
-            fullWidth
-            margin="normal"
-            InputProps={{ readOnly: true }}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
+          <Typography variant="h6">Edit Procedure</Typography>
+          <IconButton
+            onClick={() => navigate("/")}
             sx={{
-              mt: 2,
-              backgroundColor: "#6acfc7",
-              boxShadow: "0 0 10px #6acfc7",
-              "&:hover": {
-                backgroundColor: "#00d1b2",
-                boxShadow: "0 0 20px #00d1b2",
-              },
+              position: "absolute",
+              top: 10,
+              right: 16,
+              color: "white",
             }}
-            fullWidth
           >
-            Update
-          </Button>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+       <FormControl fullWidth>
+  <InputLabel>Procedure Name</InputLabel>
+  <Select
+    name="procedure"
+    value={form.procedure}
+    onChange={handleChange}
+    required
+    label="Procedure Name"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+        maxHeight: 250,         
+         overflowY: 'auto',
+        },
+      },
+    }}
+  >
+    {procedureOptions.map((option) => (
+      <MenuItem key={option} value={option}>
+        {option}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+            </Grid>
+
+            <Grid item xs={12} md={2.5}>
+              <TextField
+                label="Price"
+                name="price"
+                type="number"
+                value={form.price}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Tax*</InputLabel>
+                <Select
+                  name="tax"
+                  value={form.tax}
+                  onChange={handleChange}
+                  required
+                  label="Tax*"
+                >
+                  {taxOptions.map((tax) => (
+                    <MenuItem key={tax} value={tax}>
+                      {tax}%
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={2.5}>
+              <TextField
+                label="Total amount (INR)"
+                value={totalAmount}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12} md={2.5}>
+              <TextField
+                label="Notes"
+                name="note"
+                value={form.note}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+          </Grid>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 2,
+              mt: 4,
+            }}
+          >
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate("/")}
+              sx={{
+                borderRadius: "20px",
+                px: 4,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                backgroundColor: "#1976d2",
+                borderRadius: "20px",
+                px: 4,
+                "&:hover": {
+                  backgroundColor: "#125aa0",
+                },
+              }}
+            >
+              Save
+            </Button>
+          </Box>
         </form>
       </Paper>
     </Box>
