@@ -71,15 +71,32 @@ const ViewPricingCrud = () => {
 
   const handleModalSubmit = async (formData) => {
     try {
+      // Convert to array always
+      const dataToCheck = Array.isArray(formData) ? formData : [formData];
+
+      // ✅ Validate required fields
+      const hasEmptyRequired = dataToCheck.some(
+        (item) =>
+          !item.procedure?.trim() ||
+          !item.price?.toString().trim() ||
+          !item.tax?.toString().trim()
+      );
+
+      if (hasEmptyRequired) {
+        alert(
+          "Please fill in Procedure name, Price and Tax fields before saving."
+        );
+        return;
+      }
+
       if (editMode && selectedData?.id) {
         await axios.put(
           `https://684d210265ed087139152a4b.mockapi.io/procedure/Procedures/${selectedData.id}`,
-          formData
+          dataToCheck[0]
         );
       } else {
-        const dataToAdd = Array.isArray(formData) ? formData : [formData];
         await Promise.all(
-          dataToAdd.map((item) =>
+          dataToCheck.map((item) =>
             axios.post(
               "https://684d210265ed087139152a4b.mockapi.io/procedure/Procedures",
               item
